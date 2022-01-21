@@ -4,20 +4,8 @@
 name: 'LibreCores CI with FuseSoC'
 description: 'FuseSoC action on LibreCores CI'
 inputs:
-  arguments:
-    description: 'Arguments to the main executable'
-    required: false
   core:
     description: 'Core identifier'
-    required: false
-  core-arguments:
-    description: 'Arguments passed to the core at run'
-    required: false
-  command-arguments:
-    description: 'Arguments passed to the command'
-    required: false
-  libraries:
-    description: 'FuseSoC libraries to add'
     required: false
   target:
     description: 'Target'
@@ -25,15 +13,17 @@ inputs:
   tool:
     description: 'Tool to use'
     required: false
-  pre-run-command:
-    description: 'Execute command before the run'
-    required: false
-  path:
-    description: 'Checkout path (default: <reponame>, guessed)'
-    required: false
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
+  using: 'composite'
+  steps:
+    - run: pip3 install fusesoc
+      shell: bash
+    - run: echo "EDALIZE_LAUNCHER=el_docker" >> $GITHUB_ENV
+      shell: bash      
+    - run: fusesoc library add ${{ inputs.core }} $GITHUB_WORKSPACE/$REPO
+      shell: bash      
+    - run: fusesoc run --target=${{ inputs.target }} --tool=${{ inputs.tool }}${{ inputs.core }}
+      shell: bash      
 branding:
   icon: 'cpu'
   color: 'green'
